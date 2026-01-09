@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Dorking | Pentester Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', 'Monaco', monospace;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00ff88;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #888;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #00ff88;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+            text-shadow: 0 0 5px #00ff88;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #00ff88;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+
+        /* Tool Container */
+        .tool-container {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            transition: left 0.5s;
+        }
+
+        .tool-container:hover {
+            border-color: #00ff88;
+            box-shadow: 0 5px 25px rgba(0, 255, 136, 0.2);
+        }
+
+        .tool-container:hover::before {
+            left: 100%;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #00ff88;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #00ff88;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        }
+
+        .dork-category {
+            margin-bottom: 2rem;
+        }
+
+        .category-title {
+            font-size: 1.2rem;
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dork-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .dork-btn {
+            padding: 0.8rem 1rem;
+            background: transparent;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dork-btn:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .dork-btn:active {
+            transform: translateY(0);
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem;
+            margin-top: 2rem;
+            border-radius: 10px;
+            border: 1px solid #333;
+            font-family: 'Courier New', monospace;
+            color: #888;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 1s infinite;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ff88; }
+            to { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88; }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .dork-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🔒 PENTESTER TOOLS</div>
+            <ul class="nav-links">
+                <li><a href="/" class="nav-link" data-section="home">Home</a></li>
+                <li><a href="/uri" class="nav-link" data-section="uri">URI Manager</a></li>
+                <li><a href="/path-extracts" class="nav-link" data-section="path-extractor">Path Extractor</a></li>
+                <li><a href="/dork" class="nav-link active" data-section="dork">Auto Dorking</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">AUTO DORKING</h1>
+            <p class="hero-subtitle">Automated Google dorking tool for efficient information gathering</p>
+        </section>
+
+        <!-- Tool Container -->
+        <div class="tool-container">
+            <div class="section-title">🔍 Enter Target Domain</div>
+            <input type="text" id="target" placeholder="e.g., example.com">
+        </div>
+
+        <!-- Vulnerability Categories -->
+        <div class="tool-container">
+            <div class="dork-category">
+                <div class="category-title">🔐 Authentication & Access</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('Login Pages User')">Login Pages</button>
+                    <button class="dork-btn" onclick="searchDork('Login Pages Admin')">Admin Login</button>
+                    <button class="dork-btn" onclick="searchDork('Register Pages')">Register Pages</button>
+                    <button class="dork-btn" onclick="searchDork('Dashboard Pages')">Dashboard</button>
+                    <button class="dork-btn" onclick="searchDork('Logout Pages')">Logout Pages</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                <div class="category-title">🚨 Vulnerability Parameters</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('XSS Prone Parameters')">XSS Prone</button>
+                    <button class="dork-btn" onclick="searchDork('Open Redirect Prone Parameters')">Open Redirect</button>
+                    <button class="dork-btn" onclick="searchDork('SQLi Prone Parameters')">SQLi Prone</button>
+                    <button class="dork-btn" onclick="searchDork('SSRF Prone Parameters')">SSRF Prone</button>
+                    <button class="dork-btn" onclick="searchDork('LFI Prone Parameters')">LFI Prone</button>
+                    <button class="dork-btn" onclick="searchDork('SSTI Prone Parameters')">SSTI Prone</button>
+                    <button class="dork-btn" onclick="searchDork('RCE Prone Parameters')">RCE Prone</button>
+                    <button class="dork-btn" onclick="searchDork('Sensitive Parameters')">Sensitive Params</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                <div class="category-title">📄 Files & Extensions</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('Backup Files')">Backup Files</button>
+                    <button class="dork-btn" onclick="searchDork('Juicy Info')">Juicy Files</button>
+                    <button class="dork-btn" onclick="searchDork('PHP Extensions')">PHP Extensions</button>
+                    <button class="dork-btn" onclick="searchDork('Java Extensions')">Java Extensions</button>
+                    <button class="dork-btn" onclick="searchDork('NET Extensions')">NET Extensions</button>
+                    <button class="dork-btn" onclick="searchDork('Perl Extensions')">Perl Extensions</button>
+                    <button class="dork-btn" onclick="searchDork('Other Extensions')">Other Extensions</button>
+                    <button class="dork-btn" onclick="searchDork('Document Files')">Document Files</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                <div class="category-title">🌐 Web Applications</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('API Docs')">API Docs</button>
+                    <button class="dork-btn" onclick="searchDork('Server Errors')">Server Errors</button>
+                    <button class="dork-btn" onclick="searchDork('File Upload')">File Upload</button>
+                    <button class="dork-btn" onclick="searchDork('Blind XSS Forms')">XSS Forms</button>
+                    <button class="dork-btn" onclick="searchDork('App Frameworks')">App Frameworks</button>
+                    <button class="dork-btn" onclick="searchDork('Directory Listing')">Directory Listing</button>
+                    <button class="dork-btn" onclick="searchDork('Test Environment')">Test Environment</button>
+                    <button class="dork-btn" onclick="searchDork('Error Messages')">Error Messages</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                <div class="category-title">☁️ Cloud & Code Repositories</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('Cloud Storage')">Cloud Storage</button>
+                    <button class="dork-btn" onclick="searchDork('GitHub Leaks')">GitHub Leaks</button>
+                    <button class="dork-btn" onclick="searchDork('GitLab Leaks')">GitLab Leaks</button>
+                    <button class="dork-btn" onclick="searchDork('Pastebin Leaks')">Pastebin Leaks</button>
+                    <button class="dork-btn" onclick="searchDork('Code Sharing Sites')">Code Sharing</button>
+                    <button class="dork-btn" onclick="searchDork('Trello Boards')">Trello Boards</button>
+                    <button class="dork-btn" onclick="searchDork('Atlassian')">Atlassian</button>
+                    <button class="dork-btn" onclick="searchDork('Firebase')">Firebase</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                <div class="category-title">🔍 Advanced Search</div>
+                <div class="dork-grid">
+                    <button class="dork-btn" onclick="searchDork('Confidential Documents 1')">Confidential 1 Docs</button>
+                    <button class="dork-btn" onclick="searchDork('Confidential Documents 2')">Confidential 2 Docs</button>
+                    <button class="dork-btn" onclick="searchDork('Database Files')">Database Files</button>
+                    <button class="dork-btn" onclick="searchDork('WordPress Files')">WordPress Files</button>
+                    <button class="dork-btn" onclick="searchDork('Shell Files')">Shell Files</button>
+                    <button class="dork-btn" onclick="searchDork('JDBC Connections')">JDBC</button>
+                    <button class="dork-btn" onclick="searchDork('Download Parameters')">Download Params</button>
+                    <button class="dork-btn" onclick="searchDork('Embed Parameters')">Embed Params</button>
+                    <button class="dork-btn" onclick="searchDork('Edu Errors')">Edu Errors</button>
+                </div>
+            </div>
+
+            <div class="dork-category">
+                    <div class="category-title">Deutch Lang</div>
+                    <div class="dork-grid">
+                        <button class="dork-btn" onclick="searchDork('confidential files-nl')">confidential files deutch 1</button>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span class="status-indicator"></span>
+            <strong>System Status:</strong> Operational | 
+            <strong>Last Update:</strong> <span id="currentDate"></span> | 
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Rhyru9</p>
+            <p>Feel free to contribute!</p>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const dorks = {
+            // Authentication & Access
+            'Login Pages User': 'site:*.{domain} inurl:login | inurl:logon | inurl:sign-in | inurl:signin | inurl:wp-login | inurl:weblogin | inurl:loginpanel | inurl:quicklogin | inurl:memberlogin | inurl:forgotpassword | inurl:forgot-password | intitle:login | intitle:signin | intitle:sign-in | inurl:panel',
+            'Login Pages Admin': 'site:*.{domain} inurl:admin | inurl:administrator | inurl:adm | inurl:wp-admin | inurl:adminlogin | inurl:admin-login',
+            'Register Pages': 'site:*.{domain} inurl:signup | inurl:register | inurl:create | inurl:join | inurl:account | inurl:subscription | inurl:apply | inurl:enroll | inurl:membership | inurl:sign-up | inurl:register-account | inurl:feedback | inurl:contact | inurl:contact-us | inurl:contact-form | inurl:get-in-touch | inurl:reach-out',
+            'Dashboard Pages': 'site:*.{domain} intitle:dashboard | intitle:administrator | intitle:admin page | intitle:page admin | intitle:admin | intitle:portal admin',
+            'Logout Pages': 'site:*.{domain} inurl:"logout" | inurl:"auth?logout=" | inurl:"exit?" | inurl:"signout?" | inurl:"endSession" | inurl:"userSignOut" | inurl:"adminSignOut" | inurl:"logoutUser" | inurl:"endSession" | inurl:"?ReturnUrl=http" | inurl:"?back=http" | inurl:"=http" | inurl:"?relayState=http" -www',
+
+            // Vulnerability Parameters
+            'XSS Prone Parameters': 'inurl:lang=" | inurl:"name=" | inurl:"view=" | inurl:"name=" | inurl:"callback=" | inurl:"id=" | inurl:"q=" | inurl:"s=" | inurl:"keyword=" | inurl:"search=" | inurl:"page=" | inurl:"query=" site:*.{domain}',
+            'Open Redirect Prone Parameters': 'inurl:"page=" | inurl:"next=" | inurl:"host=" | inurl:"go=" | inurl:"goto=" | inurl:"file=" | inurl:"host=" | inurl:"redirect_to=" | inurl:"url=" | inurl:"redirect | inurl:src=http | inurl:r=http | inurl:return=" | inurl:"next=" | inurl:"redir=" | inurl:"http" inurl:& site:*.{domain}',
+            'SQLi Prone Parameters': 'inurl:"id=" | inurl:"query=" | inurl:"q=" | inurl:"name=" | inurl:"from=" | inurl:"s=" | inurl:"search=" | inurl:"page=" | inurl:"filter=" | inurl:"action=" | inurl:"sort=" | inurl:"dir=" | inurl:"reg=" | inurl:"order=" | inurl:"update=" | inurl:"delete=" | inurl:"create=" inurl:& site:*.{domain}',
+            'SSRF Prone Parameters': 'inurl:"http=" | inurl:"load=" | inurl:"exec=" | inurl:"resource=" | inurl:"resources=" | inurl:"url=" | inurl:"path=" | inurl:"host=" | inurl:"proxy=" | inurl:"html=" | inurl:"data=" | inurl:"domain=" | inurl:"uri=" inurl:& site:*.{domain}',
+            'LFI Prone Parameters': 'inurl:"include=" | inurl:"page=" | inurl:"http=" | inurl:"path=" | inurl:"template=" | inurl:"show=" | inurl:"locate=" | inurl:"site=" | inurl:"dir=" | inurl:"detail=" | inurl:"file=" | inurl:"folder=" | inurl:"locate=" | inurl:"doc=" | inurl:"filename=" | inurl:"uri=http" inurl:& site:*.{domain}',
+            'SSTI Prone Parameters': 'inurl:"module=" | inurl:"template=" | inurl:"load=" | inurl:"run=" | inurl:"preview=" | inurl:"view=" | inurl:"content=" | inurl:"activity=" | inurl:"name=" inurl:& site:*.{domain}',
+            'RCE Prone Parameters': 'inurl:"cmd=" | inurl:"ip=" | inurl:"cli=" | inurl:"load=" | inurl:"module=" | inurl:"run=" | inurl:"print=" | inurl:"exec=" | inurl:"query=" | inurl:"code=" | inurl:"do=" | inurl:"run=" | inurl:"read=" | inurl:"ping=" inurl:& site:*.{domain}',
+            'Sensitive Parameters': 'inurl:"email=" | inurl:"phone=" | inurl:"password=" | inurl:"secret=" | inurl:"token=" inurl:& site:*.{domain}',
+
+            // Files & Extensions
+            'Backup Files': 'site:*.{domain} ext:bkf | ext:bkp | ext:bak | ext:old | ext:backup | ext:log | ext:sql',
+            'Juicy Info': 'site:*.{domain} ext:txt | ext:conf | ext:cnf | ext:ini | ext:env | ext:sh | ext:swp | ext:old | ext:~ | ext:htpasswd | ext:htaccess | ext:csv | ext:.git-credentials | ext:yaml | ext:yml | ext:ppk | ext:pem | ext:json | ext:cfg | ext:xml | ext:ps1 | ext:reg | ext:inf | ext:rdp | ext:ora | ext:dbf | ext:mdb',
+            'PHP Extensions': 'site:*.{domain} ext:php | ext:phtm | ext:phtml | ext:jsp | ext:do | ext:action | ext:struts | ext:java | ext:class | ext:jar | ext:war | ext:ear | ext:aspx | ext:asa | ext:asp | ext:asax | ext:pl | ext:cfm | ext:py | ext:rb | ext:js',
+            'Java Extensions': 'site:*.{domain} ext:jsp | ext:do | ext:action | ext:struts | ext:java | ext:class | ext:jar | ext:war | ext:ear',
+            'NET Extensions': 'site:*.{domain} ext:aspx | ext:asa | ext:asp | ext:asax',
+            'Perl Extensions': 'site:*.{domain} ext:pl',
+            'Other Extensions': 'site:*.{domain} ext:cfm | ext:py | ext:rb | ext:js',
+            'Document Files': 'site:*.{domain} ext:doc | ext:xlsx | ext:docx | ext:dotx | ext:xls | ext:xlsm | ext:odt | ext:pdf | ext:rtf | ext:sxw | ext:psw | ext:ppt | ext:pptx | ext:pps | ext:csv | ext:swf intext:password|pass|email|admin|user|offer|data|employee|order|internal|sensitive',
+
+            // Web Applications
+            'API Docs': 'site:*.{domain} inurl:api | inurl:/rest | inurl:/v1 | inurl:/v2 | inurl:/v3 | inurl:swagger | inurl:graphql | inurl:graphiql',
+            'Server Errors': 'site:*.{domain} intext:"error" | intext:"exception" | intext:"failure" | intext:"server at" | intext:exception | intext:"database error" | intext:"SQL syntax"',
+            'File Upload': 'site:*.{domain} intext:"choose file" | intext:"file upload" | inurl:upload.php | inurl:upload.asp | inurl:upload.aspx | inurl:upload.jsp | inurl:upload.do | inurl:upload.action | intitle:"index of" "upload"',
+            'Blind XSS Forms': 'site:*.{domain} intitle:"support" | inurl:support | inurl:"contact" | intitle:"survey" | inurl:"survey" | inurl:"feedback" | intitle:"feedback" | inurl:"submit" | intitle:"submit" -pdf -doc -docx -xls',
+            'App Frameworks': 'site:*.{domain} inurl:/content/usergenerated | inurl:/content/dam | inurl:/jcr:content | inurl:/libs/granite | inurl:/etc/clientlibs | inurl:/content/geometrixx | inurl:/bin/wcm | inurl:/crx/de | "Whoops! There was an error." | inurl:/frontend_dev.php/$ | inurl:/app/config/ | inurl:/settings.py intitle:"Index of" | "SF_ROOT_DIR"',
+            'Directory Listing': 'site:*.{domain} intitle:"index of /" | intitle:"index of /" admin|user|portal|data|config|backup|password|email|employee|upload|uploads|download | intitle:"Index of" .env | .git | wc.db | .svn | .hg | .ovpn | config.php | database.sql',
+            'Test Environment': 'site:*.{domain} inurl:test | inurl:env | inurl:dev | inurl:staging | inurl:sandbox | inurl:debug | inurl:temp | inurl:internal | inurl:demo',
+            'Error Messages': 'site:*.{domain} "unexpected error" | "Uncaught Exception" | "fatal error" | "Unknown column" | "exception occurred" | "undefined index" | "unhandled exception" | "stack trace" | "query failed"',
+
+            // Cloud & Code Repositories
+            'Cloud Storage': 'site:s3.amazonaws.com "*.{domain}" | site:blob.core.windows.net "*.{domain}" | site:googleapis.com "*.{domain}" | site:drive.google.com "*.{domain}" | site:dev.azure.com "*.{domain}" | site:onedrive.live.com "*.{domain}" | site:digitaloceanspaces.com "*.{domain}" | site:sharepoint.com "*.{domain}" | site:amazonaws.com "*.{domain}" | inurl:www.dropbox.com/s/ "*.{domain}" | site:box.com/s "*.{domain}" | site:docs.google.com inurl:"/d/" "*.{domain}"',
+            'GitHub Leaks': 'site:github.com "*.{domain}" | site:gist.github.com "*.{domain}"',
+            'GitLab Leaks': 'site:gitlab.com "*.{domain}"',
+            'Pastebin Leaks': 'site:pastebin.com "*.{domain}" | site:codebeautify.org "*.{domain}" | site:codepad.co "*.{domain}" | site:codepen.io "*.{domain}" | site:codeshare.io "*.{domain}"',
+            'Code Sharing Sites': 'site:bitbucket.org "*.{domain}" | site:bitbucket.org inurl:*.{domain} | site:jsfiddle.net "*.{domain}" | site:libraries.io "*.{domain}" | site:npm.runkit.com "*.{domain}" | site:npmjs.com "*.{domain}" | site:repl.it "*.{domain}" | site:scribd.com "*.{domain}" | site:sharecode.io "*.{domain}" | site:ycombinator.com "*.{domain}"',
+            'Trello Boards': 'site:trello.com "*.{domain}"',
+            'Atlassian': 'site:atlassian.net "*.{domain}" | site:atlassian.net inurl:/servicedesk/customer/user/login "*.{domain}"',
+            'Firebase': 'site:firebaseio.com "*.{domain}"',
+
+            // deutch
+            'confidential files-nl': 'site:*.{domain} (ext:doc OR ext:xlsx OR ext:docx OR ext:dotx OR ext:xls OR ext:xlsm OR ext:odt OR ext:pdf OR ext:rtf OR ext:sxw OR ext:psw OR ext:ppt OR ext:pptx OR ext:pps OR ext:csv OR ext:swf) (intext:"Vertrouwelijk" OR intext:"Niet delen" OR intext:"E-mail" OR intext:"Alleen voor privégebruik" OR intext:"Niet voor publieke verspreiding" OR intext:"Alleen voor intern gebruik" OR intext:"Niet verspreiden" OR intext:wachtwoord OR intext:gebruiker OR intext:admin OR intext:intern OR intext:gevoelig OR intext:aanbieding OR intext:medewerker OR intext:bestelling OR intext:data OR intext:informatie OR intext:persoonlijk)',
+
+            // Advanced Search
+            'Confidential Documents 1': 'site:*.{domain} ext:doc | ext:xlsx | ext:docx | ext:dotx | ext:xls | ext:xlsm | ext:odt | ext:pdf | ext:rtf | ext:sxw | ext:psw | ext:ppt | ext:pptx | ext:pps | ext:csv | ext:swf intext:password|pass|email|admin|user|offer|data|employee|order|internal|sensitive',
+            'Confidential Documents 2': 'site:*.{domain} intext:"confidential" | "Not for Public Release" | "internal use only" | "do not distribute"',
+            'Database Files': 'site:*.{domain} intitle:"Index of" ext:sql | ext:sql.gz | ext:sql.rar | ext:sql.zip | ext:bkp | ext:bkp.gz | ext:bkp.rar | ext:bkp.zip | ext:zip | ext:7z | ext:rar | ext:gz',
+            'WordPress Files': 'site:*.{domain} inurl:wp- | inurl:wp-content | inurl:plugins | inurl:uploads | inurl:themes | inurl:download | inurl:readme | inurl:license | inurl:install | inurl:setup | inurl:config',
+            'Shell Files': 'site:*.{domain} inurl:shell | inurl:backdoor | inurl:wso | inurl:cmd | shadow | passwd | boot.ini | inurl:backdoor',
+            'JDBC Connections': 'site:*.{domain} jdbc',
+            'Download Parameters': 'inurl:"download?path=" | inurl:"download?file=" | inurl:"download?location=" | inurl:"download?f=" | inurl:"download?view=" | inurl:"download?preview=" | inurl:"download?show=" | inurl:"download?foder" | inurl:"download?d=" | inurl:"download?index=" | inurl:"download?id=" inurl:& site:*.{domain}',
+            'Embed Parameters': 'inurl:"?url=http" | inurl:"?link=http" | inurl:"?redirect=http" | inurl:"?next=http" | inurl:"?path=http" | inurl:"?file=http" | inurl:"?external=http" | inurl:"?proxy=http" | inurl:"?view=http" | inurl:"?show=http" | inurl:"?site=http" | inurl:"?page=http" | inurl:"?goto=http" | inurl:"?include=http" | inurl:"?module=http" inurl:& site:*.{domain}',
+            'Edu Errors': 'site:"*.{domain}" inurl:".php?error_message=" | inurl:".php?error_msg=" | inurl:".php?err_message=" | inurl:".php?msg=" | inurl:".php?message=" | inurl:".aspx?error_message=" | inurl:".aspx?error_msg=" | inurl:".aspx?err_message=" | inurl:".aspx?msg=" | inurl:".aspx?message=" | inurl:".asp?error_message=" | inurl:".asp?error_msg=" | inurl:".asp?err_message=" | inurl:".asp?msg=" | inurl:".asp?message=" | inurl:"error_message=" | inurl:"error_msg=" | inurl:"err_message=" | inurl:"msg=" | inurl:"message="'
+        };
+
+        function searchDork(type) {
+            const target = document.getElementById('target').value.trim();
+            if (!target) {
+                alert('Please enter a target domain.');
+                return;
+            }
+            
+            const cleanDomain = target.replace(/^https?:\/\//, '').replace(/^www\./, '');
+            
+            const query = dorks[type].replace(/{domain}/g, cleanDomain);
+            const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            window.open(url, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.dork-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

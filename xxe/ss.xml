@@ -1,0 +1,2 @@
+<!DOCTYPE r [ <!ENTITY % test SYSTEM "file:///etc/passwd"> ]>
+<r>&test;</r>

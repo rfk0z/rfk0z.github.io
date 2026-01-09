@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Path Extractor - Bug Bounty Toolkit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">🐛 BugHunter Toolkit</div>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="uri-manager.html">URI Manager</a></li>
+      <li><a href="path-extractor.html">Path Extractor</a></li>
+      <li><a href="dork-generator.html">Dork Generator</a></li>
+      <li><a href="domain-filter.html">Domain Filters</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button id="themeToggle" class="btn btn-secondary" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--yellow); text-align: center;">
+        🔍 Path Extractor
+      </h1>
+      <p style="text-align: center; font-size: 1.1rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto;">
+        Universal pattern-based wordlist generator for bug bounty fuzzing
+      </p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Workflow Info -->
+    <section class="base-card mb-4">
+      <h2 class="text-secondary mb-2" style="font-size: 1.3rem;">📋 Workflow</h2>
+      <div class="alert alert-info">
+        <span style="font-size: 1.5rem;">🔄</span>
+        <div style="flex: 1;">
+          <strong>Step 1:</strong> Collect URLs from wayback machine, katana, waymore → <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 3px;">tests.txt</code><br>
+          <strong>Step 2:</strong> Process with Path Extractor → Extract clean segments<br>
+          <strong>Step 3:</strong> Copy results → Paste to <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 3px;">seclist.txt</code><br>
+          <strong>Step 4:</strong> Use seclist.txt as wordlist for fuzzing (ffuf, dirsearch, etc)
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="base-card mb-4">
+      <h2 class="text-secondary mb-2" style="font-size: 1.3rem;">📊 Statistics</h2>
+      <div class="flex gap-3" style="flex-wrap: wrap;">
+        <div class="base-card" style="flex: 1; min-width: 150px; padding: 1rem; text-align: center;">
+          <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Total Input</div>
+          <div class="text-secondary" style="font-size: 2rem; font-weight: bold;" id="totalInput">0</div>
+        </div>
+        <div class="base-card" style="flex: 1; min-width: 150px; padding: 1rem; text-align: center;">
+          <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Unique Results</div>
+          <div class="text-secondary" style="font-size: 2rem; font-weight: bold;" id="uniqueResults">0</div>
+        </div>
+        <div class="base-card" style="flex: 1; min-width: 150px; padding: 1rem; text-align: center;">
+          <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Filtered</div>
+          <div class="text-secondary" style="font-size: 2rem; font-weight: bold;" id="filteredCount">0</div>
+        </div>
+        <div class="base-card" style="flex: 1; min-width: 150px; padding: 1rem; text-align: center;">
+          <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Keep Rate</div>
+          <div class="text-secondary" style="font-size: 2rem; font-weight: bold;" id="keepRate">0%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Tool Grid -->
+    <div class="dashboard-grid">
+      <!-- Input Section -->
+      <div class="tool-card base-card">
+        <div class="tool-header">
+          <div class="tool-title">📥 Input (tests.txt)</div>
+          <span class="badge badge-info" id="inputCount">0 lines</span>
+        </div>
+
+        <div class="textarea-group">
+          <label>Paste URLs from wayback/katana/waymore:</label>
+          <textarea id="inputUrls" rows="15" placeholder="https://digilib.itb.ac.id/gdl/read/344607
+https://digilib.itb.ac.id/gdl/view/88038
+https://example.com/api/v1/users/123456
+https://example.com/blog/article-title-long-here
+http://site.com/path/to/resource.js"></textarea>
+        </div>
+
+        <div class="alert alert-warning mt-2" style="font-size: 0.85rem;">
+          <span>⚠️</span>
+          <div style="flex: 1;">
+            <strong>Note:</strong> Blacklist files must be available at:
+            <code style="background: rgba(0,0,0,0.3); padding: 0.1rem 0.3rem; border-radius: 2px;">blacklists/humannames.txt</code> and
+            <code style="background: rgba(0,0,0,0.3); padding: 0.1rem 0.3rem; border-radius: 2px;">blacklists/keywords.txt</code>
+          </div>
+        </div>
+
+        <div class="button-group mt-2">
+          <button class="btn btn-primary" onclick="processUrls()">🚀 Extract Paths</button>
+          <button class="btn btn-secondary" onclick="clearInput()">🗑️ Clear Input</button>
+        </div>
+      </div>
+
+      <!-- Configuration Section -->
+      <div>
+        <div class="tool-card base-card mb-3">
+          <div class="tool-header">
+            <div class="tool-title">⚙️ Configuration</div>
+          </div>
+
+          <div class="radio-group mb-2">
+            <div class="radio-item">
+              <input type="radio" id="modeSegments" name="mode" value="segments" checked>
+              <label for="modeSegments">Segments Mode (extract /api, /v1, etc)</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="modeFullpaths" name="mode" value="fullpaths">
+              <label for="modeFullpaths">Full Paths Mode (keep complete paths)</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" id="modeDomains" name="mode" value="domains">
+              <label for="modeDomains">Domains Only</label>
+            </div>
+          </div>
+
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="excludeQuery" checked>
+              <label for="excludeQuery">Remove query strings (?param=value)</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="excludeExtensions" checked>
+              <label for="excludeExtensions">Remove file extensions (.js, .css, etc)</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="excludeDocContent" checked>
+              <label for="excludeDocContent">Smart document filtering (IDs, titles)</label>
+            </div>
+          </div>
+
+          <div class="input-group mt-2">
+            <label>Min Segment Length:</label>
+            <input type="number" id="minLength" value="2" min="1" max="10">
+          </div>
+
+          <div class="input-group">
+            <label>Max Segment Length:</label>
+            <input type="number" id="maxLength" value="40" min="10" max="100">
+          </div>
+        </div>
+
+        <div class="tool-card base-card">
+          <div class="tool-header">
+            <div class="tool-title">📊 Filter Breakdown</div>
+          </div>
+
+          <div id="filterStats" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;">
+            <div class="flex justify-between mb-1">
+              <span>Spam Keywords:</span>
+              <span class="badge badge-error" id="statSpam">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>Human Names:</span>
+              <span class="badge badge-error" id="statHumanName">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>File Extensions:</span>
+              <span class="badge badge-warning" id="statExtension">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>Numeric IDs:</span>
+              <span class="badge badge-warning" id="statNumeric">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>Document IDs:</span>
+              <span class="badge badge-warning" id="statDocId">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>Long Titles:</span>
+              <span class="badge badge-warning" id="statLongTitle">0</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>Hash/UUID/Base64:</span>
+              <span class="badge badge-info" id="statHash">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Other Filters:</span>
+              <span class="badge badge-info" id="statOther">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Examples -->
+    <section class="base-card mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-secondary" style="font-size: 1.3rem;">🎯 What Gets Filtered?</h2>
+        <button class="btn btn-secondary" onclick="toggleExamples()">Show/Hide Examples</button>
+      </div>
+
+      <div id="filterExamples" style="display: none;">
+        <div class="dashboard-grid">
+          <div class="collapsible active">
+            <div class="collapsible-header">
+              <span style="font-weight: 600;">✅ Kept (Valid Segments)</span>
+            </div>
+            <div class="collapsible-content">
+              <ul class="list-output" style="font-size: 0.85rem;">
+                <li><code>/api</code> - Technical path</li>
+                <li><code>/admin</code> - Common endpoint</li>
+                <li><code>/v1</code> - Version number</li>
+                <li><code>/users</code> - Resource name</li>
+                <li><code>/gdl</code> - Any path name (not hardcoded!)</li>
+                <li><code>/read</code> - Operation keyword</li>
+                <li><code>/dashboard</code> - Interface path</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="collapsible active">
+            <div class="collapsible-header">
+              <span style="font-weight: 600;">❌ Filtered (Noise)</span>
+            </div>
+            <div class="collapsible-content">
+              <ul class="list-output" style="font-size: 0.85rem;">
+                <li><code>/123456</code> - Pure numeric ID</li>
+                <li><code>/read/344607</code> - Document ID after operation</li>
+                <li><code>/studi-perancangan-kawasan-...</code> - Long article title</li>
+                <li><code>/242028593QBE224BY8</code> - Mixed alphanumeric spam</li>
+                <li><code>/ahmad</code> - Human name</li>
+                <li><code>/casino</code> - Spam keyword</li>
+                <li><code>/file.js</code> - File extension</li>
+                <li><code>/uuid-123e4567-e89b-12d3</code> - UUID pattern</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Output Section -->
+    <section class="tool-card base-card">
+      <div class="tool-header">
+        <div class="tool-title">📤 Output (seclist.txt)</div>
+        <span class="badge badge-success" id="outputCount">0 lines</span>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Clean Wordlist for Fuzzing</span>
+          <div class="output-actions">
+            <button class="copy-btn" onclick="copyOutput()">Copy</button>
+            <button class="download-btn" onclick="downloadOutput()">Download</button>
+            <button class="clear-btn" onclick="clearOutput()">Clear</button>
+          </div>
+        </div>
+        <textarea id="outputPaths" class="output-content" rows="20" readonly placeholder="Extracted paths will appear here...
+
+Ready to use with:
+- ffuf -w seclist.txt -u https://target.com/FUZZ
+- dirsearch -w seclist.txt -u https://target.com
+- gobuster dir -w seclist.txt -u https://target.com"></textarea>
+      </div>
+
+      <div class="progress-bar" id="progressBar" style="display: none;">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+    </section>
+
+    <!-- Loading Indicator -->
+    <div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; text-align: center;">
+      <div class="spinner" style="margin: 0 auto 1rem;"></div>
+      <div style="color: var(--yellow); font-weight: 600;">Processing URLs...</div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" style="position: fixed; bottom: 100px; right: 20px; background: var(--orange); color: var(--dark-blue); padding: 1rem 1.5rem; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="status-indicator"></div>
+      <span>Path Extractor Ready</span>
+    </div>
+    <div class="status-item">
+      <span>Mode: <span id="currentMode">Segments</span></span>
+    </div>
+    <div class="status-item">
+      <span>Blacklists: <span id="blacklistStatus">Loading...</span></span>
+    </div>
+    <div class="status-item">
+      <span>Version: 1.0.0</span>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0QF9Y2TV2T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-0QF9Y2TV2T');
+  </script>
+  <script>
+    // Theme toggle (from settings.js)
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    html.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+    themeToggle?.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', newTheme);
+    });
+  </script>
+  
+  <script src="js/extract.js"></script>
+  
+  <script>
+    // Global extractor instance
+    let extractor = null;
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', async () => {
+      showToast('Initializing Path Extractor...');
+      
+      try {
+        extractor = new PathExtractor({
+          mode: 'segments',
+          excludeQuery: true,
+          excludeExtensions: true,
+          excludeDocumentContent: true,
+          minSegmentLength: 2,
+          maxSegmentLength: 40,
+          blacklistFiles: [
+            'blacklists/humannames.txt',
+            'blacklists/keywords.txt'
+          ]
+        });
+
+        // Load blacklists
+        const result = await extractor.loadBlacklists();
+        
+        if (result.errors.length > 0) {
+          document.getElementById('blacklistStatus').textContent = 'Defaults';
+          showToast('Using default blacklists', 'warning');
+        } else {
+          document.getElementById('blacklistStatus').textContent = `${result.humanNames + result.keywords} entries`;
+          showToast('Blacklists loaded successfully!');
+        }
+      } catch (error) {
+        console.error('Init error:', error);
+        document.getElementById('blacklistStatus').textContent = 'Error';
+        showToast('Failed to initialize: ' + error.message, 'error');
+      }
+    });
+
+    // Process URLs
+    async function processUrls() {
+      const input = document.getElementById('inputUrls').value.trim();
+      
+      if (!input) {
+        showToast('Please paste some URLs first!', 'warning');
+        return;
+      }
+
+      if (!extractor) {
+        showToast('Extractor not initialized!', 'error');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('progressBar').style.display = 'block';
+
+      try {
+        // Update config from UI
+        extractor.options.mode = document.querySelector('input[name="mode"]:checked').value;
+        extractor.options.excludeQuery = document.getElementById('excludeQuery').checked;
+        extractor.options.excludeExtensions = document.getElementById('excludeExtensions').checked;
+        extractor.options.excludeDocumentContent = document.getElementById('excludeDocContent').checked;
+        extractor.options.minSegmentLength = parseInt(document.getElementById('minLength').value);
+        extractor.options.maxSegmentLength = parseInt(document.getElementById('maxLength').value);
+
+        // Process
+        const result = await extractor.extract(input);
+
+        // Update output
+        document.getElementById('outputPaths').value = extractor.formatOutput(result.results);
+
+        // Update stats
+        updateStats(result.stats);
+
+        // Update filter breakdown
+        updateFilterStats(result.stats.filtered);
+
+        showToast(`✅ Extracted ${result.stats.unique} unique paths from ${result.stats.total} URLs`);
+
+      } catch (error) {
+        console.error('Processing error:', error);
+        showToast('Error: ' + error.message, 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('progressBar').style.display = 'none';
+      }
+    }
+
+    // Update statistics
+    function updateStats(stats) {
+      document.getElementById('totalInput').textContent = stats.total;
+      document.getElementById('uniqueResults').textContent = stats.unique;
+      document.getElementById('filteredCount').textContent = stats.filteredTotal;
+      document.getElementById('keepRate').textContent = stats.keepRate;
+      document.getElementById('outputCount').textContent = stats.unique + ' lines';
+    }
+
+    // Update filter breakdown
+    function updateFilterStats(filtered) {
+      document.getElementById('statSpam').textContent = filtered.spam || 0;
+      document.getElementById('statHumanName').textContent = filtered.humanName || 0;
+      document.getElementById('statExtension').textContent = filtered.extension || 0;
+      document.getElementById('statNumeric').textContent = filtered.numeric || 0;
+      document.getElementById('statDocId').textContent = filtered.documentId || 0;
+      document.getElementById('statLongTitle').textContent = filtered.longTitle || 0;
+      
+      const hashTotal = (filtered.hash || 0) + (filtered.uuid || 0) + (filtered.base64 || 0);
+      document.getElementById('statHash').textContent = hashTotal;
+      
+      const otherTotal = (filtered.date || 0) + (filtered.mixed || 0) + (filtered.technical || 0) + (filtered.length || 0);
+      document.getElementById('statOther').textContent = otherTotal;
+    }
+
+    // Copy output
+    function copyOutput() {
+      const output = document.getElementById('outputPaths');
+      output.select();
+      document.execCommand('copy');
+      
+      const btn = event.target;
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+      
+      showToast('Copied to clipboard!');
+    }
+
+    // Download output
+    function downloadOutput() {
+      const content = document.getElementById('outputPaths').value;
+      if (!content.trim()) {
+        showToast('Nothing to download!', 'warning');
+        return;
+      }
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'seclist.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast('Downloaded as seclist.txt');
+    }
+
+    // Clear functions
+    function clearInput() {
+      document.getElementById('inputUrls').value = '';
+      document.getElementById('inputCount').textContent = '0 lines';
+      showToast('Input cleared');
+    }
+
+    function clearOutput() {
+      document.getElementById('outputPaths').value = '';
+      document.getElementById('outputCount').textContent = '0 lines';
+      updateStats({ total: 0, unique: 0, filteredTotal: 0, keepRate: '0%' });
+      showToast('Output cleared');
+    }
+
+    // Toggle examples
+    function toggleExamples() {
+      const examples = document.getElementById('filterExamples');
+      examples.style.display = examples.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Update input count
+    document.getElementById('inputUrls').addEventListener('input', function() {
+      const lines = this.value.trim().split('\n').filter(l => l.trim()).length;
+      document.getElementById('inputCount').textContent = lines + ' lines';
+      document.getElementById('totalInput').textContent = lines;
+    });
+
+    // Update mode display
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const modes = { segments: 'Segments', fullpaths: 'Full Paths', domains: 'Domains' };
+        document.getElementById('currentMode').textContent = modes[this.value];
+      });
+    });
+
+    // Toast helper
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      const colors = {
+        success: 'var(--orange)',
+        warning: '#fbbf24',
+        error: '#f87171'
+      };
+      
+      toast.style.background = colors[type] || colors.success;
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 3000);
+    }
+
+    // Initialize collapsibles
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+      header.addEventListener('click', function() {
+        this.parentElement.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+
+</html>
